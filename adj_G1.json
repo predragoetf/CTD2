@@ -1,0 +1,21 @@
+{
+    "S_perturbed_nodes":[
+        "26",
+        "11",
+        "21",
+        "10",
+        "18",
+        "32"
+    ],
+    "F_most_connected_nodes":[
+"26",
+"11",
+"21",
+"10",
+"18",
+"32"
+    ],
+    "p_value":    1.02419943207167e-07,
+    "kmcm_probability":    0.015625,
+    "optimal_bitstring":"TTTTTT"
+}
