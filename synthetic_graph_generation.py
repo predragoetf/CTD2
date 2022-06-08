@@ -17,7 +17,7 @@ start_time = time.time()
 parser = argparse.ArgumentParser(description='Generate test case graph and run CTD on both.')
 
 # Optional argument
-parser.add_argument('--G_num_nodes', type=int, default=10000,
+parser.add_argument('--G_num_nodes', type=int, default=1000,
                     help='Number of nodes in the graph')
 parser.add_argument('--G_density', type=float, default=0.1,
                     help='Density of edges in graph')
@@ -39,8 +39,8 @@ def generate_random_connected_graph(num_nodes, background_density, background_we
     num_edges_to_add = int(num_nodes*(num_nodes - 1)*0.5*background_density - (num_nodes - 1))
     #pick num_edges_to_add random edges to add to G
     flexible_edge_list = random.sample(list(nx.non_edges(G)), num_edges_to_add)
-    G = nx.Graph(set(G.edges).union(set(flexible_edge_list)))
-    #G.add_edges_from(flexible_edge_list)
+    #G = nx.Graph(set(G.edges).union(set(flexible_edge_list)))
+    G.add_edges_from(flexible_edge_list)
     nx.set_edge_attributes(G, values = background_weight, name = 'weight')
     
     assert(nx.is_connected(G)) 
@@ -104,11 +104,11 @@ def rewire(G, S_path_graph, S_weight):
     edges_to_erase = random.sample(list(unprotected_edges), len(added_edges))
 
     eprint("Started edge removal")
-    new_G = nx.Graph(set(G.edges).difference(edges_to_erase))
-    #G.remove_edges_from(edges_to_erase)
+    #new_G = nx.Graph(set(G.edges).difference(edges_to_erase))
+    G.remove_edges_from(edges_to_erase)
     eprint("Removed edges and finished graph rewiring")
-    return new_G
-
+    #return new_G
+    return G
 
 def choose_S_path(G, num_S):
     #candidates = []
