@@ -34,7 +34,7 @@ def calculate_bonferroni_pvalue(json_G1, json_G2, out_result_path='bonferroni.js
         data = json.loads(contents)
         pval1 = data['p_value']
         G1_num_of_nodes = data['number_of_nodes_in_G']
-        not_found = len(data['S_perturbed_nodes']) - len(data['optimal_bitstring'])
+        not_found = len(data['S_perturbed_nodes']) - data['optimal_bitstring'].count('T')
         power = (not_found + 1) * np.log2(G1_num_of_nodes) + len(data['optimal_bitstring']) - 1
         probability_S_in_G1 = np.power(2, -power)
         eprint(f"probability of S in G1:{probability_S_in_G1}")
