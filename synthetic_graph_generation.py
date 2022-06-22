@@ -17,14 +17,16 @@ start_time = time.time()
 parser = argparse.ArgumentParser(description='Generate test case graph and run CTD on both.')
 
 # Optional argument
-parser.add_argument('--G_num_nodes', type=int, default=1000,
+parser.add_argument('--G_num_nodes', type=int, default=100,
                     help='Number of nodes in the graph')
 parser.add_argument('--G_density', type=float, default=0.1,
                     help='Density of edges in graph')
-parser.add_argument('--weight_ratio', type=int, default=10,
+parser.add_argument('--weight_ratio', type=int, default=33,
                     help='Path to the pretrained model file.')
-parser.add_argument('--node_number_ratio', type=float, default=0.01,
+parser.add_argument('--node_number_ratio', type=float, default=0.1,
                     help='Percentage of samples used for training.')
+parser.add_argument('--S_graph_type', type=int, default=0,
+                    help='Type of the planted subgraph. Clique (0), path graph (1).')
 args, unknown = parser.parse_known_args()
 
 
@@ -81,12 +83,12 @@ def simple_depth_walk(G, source_node, length, stack, exclude_set=set()):
     return ret
 
 
-def rewire(G, S_path_graph, S_weight):
+def rewire(G, S_graph, S_weight):
 
     #add missing edges from S_path
-    #weight_dict = {e: S_weight for e in S_path_graph.edges()}
+    #weight_dict = {e: S_weight for e in S_graph.edges()}
     added_edges = []
-    for u, v in S_path_graph.edges():
+    for u, v in S_graph.edges():
         if (u, v) not in G.edges():
             added_edges.append((u, v))
             G.add_edge(u, v)
@@ -98,7 +100,7 @@ def rewire(G, S_path_graph, S_weight):
     spanning_dfs_tree = nx.dfs_tree(G, source=source_node, depth_limit=len(G))
 
     eprint("Constructed a spannig tree")
-    protected_edges = set(S_path_graph.edges()).union(set(spanning_dfs_tree.edges()))
+    protected_edges = set(S_graph.edges()).union(set(spanning_dfs_tree.edges()))
     unprotected_edges = set(G.edges()).difference(protected_edges)
 
     edges_to_erase = random.sample(list(unprotected_edges), len(added_edges))
@@ -159,38 +161,25 @@ def path_compare(path1, path2):
     return True
 
 
-def construct_test_case(G_num_nodes, G_density, G_background_weight, S_num_nodes, S_weight):
+def construct_test_case(G_num_nodes, G_density, G_background_weight, S_num_nodes, S_weight, S_graph_type):
+    graph_type = {0: 'clique', 1: 'path'}
     G1 = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight)
     G2, flexible_edges = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight, return_flexible_edges = True)
     
-    S_nodes = random.sample(list(G1.nodes), S_num_nodes)#choose_S_path(G1, S_num_nodes)
-    S_path_graph = nx.path_graph(S_nodes)
-
-    rewire(G1, S_path_graph, S_weight)
+    S_nodes = random.sample(list(G1.nodes), S_num_nodes)
+    if graph_type[S_graph_type] == 'path':
+        S_graph = nx.path_graph(S_nodes)
+    else:
+        S_graph = nx.complete_graph(S_nodes)
+        
+    rewire(G1, S_graph, S_weight)
     
-    rewire(G2, S_path_graph, S_weight)
+    rewire(G2, S_graph, S_weight)
 
     assert nx.is_connected(G1), "G1 is not connected"
     assert nx.is_connected(G2), "G2 is not connected"
-    # filtered_edges = []
-    # for (a,b) in flexible_edges:
-    #     if (a,b) in S_path_graph.edges():
-    #         pass
-    #     else:
-    #         filtered_edges.append((a,b))
-    # flexible_edges= filtered_edges
     
-    #weight_dict = {e:S_weight for e in S_path_graph.edges()}
-    # for u, v in S_path_graph.edges():
-    #     #     G1[u][v]['weight'] = S_weight
-    #     #     if ((u,v) not in G2.edges()):
-    #     #         G2.add_edge(u, v)
-    #     #         (a,b) = random.choice(flexible_edges)
-    #     #         G2.remove_edge(a,b)
-    #     #         flexible_edges.remove((a,b))
-    #     #         G2[u][v]['weight'] = S_weight
-    
-    return (G1, G2, list(S_path_graph.nodes) )
+    return (G1, G2, list(S_graph.nodes) )
 
 
 def write_test_case_to_CTD2_input_files(G1, G2, S, out_name_G1=None, out_name_G2=None, S_path=None):
@@ -214,7 +203,7 @@ def write_test_case_to_CTD2_input_files(G1, G2, S, out_name_G1=None, out_name_G2
         adj_G2.to_csv(path_or_buf='adj_G2.csv',index=False)
 
 
-(G1, G2, S) = construct_test_case(G_num_nodes=args.G_num_nodes, G_density=args.G_density, G_background_weight=0.1, S_num_nodes=int(np.floor(args.node_number_ratio*args.G_num_nodes)), S_weight=0.1*args.weight_ratio)
+(G1, G2, S) = construct_test_case(G_num_nodes=args.G_num_nodes, G_density=args.G_density, G_background_weight=0.1, S_num_nodes=int(np.floor(args.node_number_ratio*args.G_num_nodes)), S_weight=0.1*args.weight_ratio, S_graph_type=args.S_graph_type)
 params = '_'.join(map(str, [args.G_num_nodes, args.G_density, args.weight_ratio, args.node_number_ratio]))
 out_name_G1 = 'G1_' + params + '.csv'
 out_name_G2 = 'G2_' + params + '.csv'
@@ -222,6 +211,7 @@ S_fname = 'S_' + params + '.csv'
 write_test_case_to_CTD2_input_files(G1, G1, S, out_name_G1, out_name_G2, S_fname)
 
 exec_time = (time.time() - start_time)
+eprint("Written graphs: {} | {}".format(out_name_G1, out_name_G2))
 eprint("--- %s seconds ---" % exec_time)
 
 # tree = nx.random_tree(n=10, seed=0)
