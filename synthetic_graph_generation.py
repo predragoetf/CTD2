@@ -90,7 +90,7 @@ def rewire(G, S_path_graph, S_weight):
         if (u, v) not in G.edges():
             added_edges.append((u, v))
             G.add_edge(u, v)
-            G[u][v]['weight'] = S_weight
+        G[u][v]['weight'] = S_weight
 
     eprint("Added all S edges to graph")
     #construct a spanning tree to be able to remove edges
