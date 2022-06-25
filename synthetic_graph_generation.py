@@ -21,7 +21,7 @@ parser.add_argument('--G_num_nodes', type=int, default=100,
                     help='Number of nodes in the graph')
 parser.add_argument('--G_density', type=float, default=0.1,
                     help='Density of edges in graph')
-parser.add_argument('--weight_ratio', type=int, default=33,
+parser.add_argument('--weight_ratio', type=float, default=2,
                     help='Path to the pretrained model file.')
 parser.add_argument('--node_number_ratio', type=float, default=0.1,
                     help='Percentage of samples used for training.')
