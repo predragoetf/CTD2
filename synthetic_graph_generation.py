@@ -162,7 +162,6 @@ def path_compare(path1, path2):
 
 
 def construct_test_case(G_num_nodes, G_density, G_background_weight, S_num_nodes, S_weight, S_graph_type):
-    graph_type = {0: 'clique', 1: 'path'}
     G1 = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight)
     G2, flexible_edges = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight, return_flexible_edges = True)
     
@@ -202,9 +201,9 @@ def write_test_case_to_CTD2_input_files(G1, G2, S, out_name_G1=None, out_name_G2
     else:
         adj_G2.to_csv(path_or_buf='adj_G2.csv',index=False)
 
-
+graph_type = {0: 'clique', 1: 'path'}
 (G1, G2, S) = construct_test_case(G_num_nodes=args.G_num_nodes, G_density=args.G_density, G_background_weight=0.1, S_num_nodes=int(np.floor(args.node_number_ratio*args.G_num_nodes)), S_weight=0.1*args.weight_ratio, S_graph_type=args.S_graph_type)
-params = '_'.join(map(str, [args.G_num_nodes, args.G_density, args.weight_ratio, args.node_number_ratio]))
+params = '_'.join(map(str, [args.G_num_nodes, args.G_density, args.weight_ratio, args.node_number_ratio, graph_type[args.S_graph_type]]))
 out_name_G1 = 'G1_' + params + '.csv'
 out_name_G2 = 'G2_' + params + '.csv'
 S_fname = 'S_' + params + '.csv'
