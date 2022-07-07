@@ -18,9 +18,9 @@ parser = argparse.ArgumentParser(description='Generate test case graph and run C
 
 # Optional argument
 parser.add_argument('--G_num_nodes', type=int, default=100,
-                    help='Number of nodes in the graph')
-parser.add_argument('--G_density', type=float, default=0.1,
-                    help='Density of edges in graph')
+                    help='Number of nodes in the graph.')
+parser.add_argument('--G_num_neighbors', type=float, default=5,
+                    help='Average number of neighboring nodes in the graph.')
 parser.add_argument('--weight_ratio', type=float, default=2,
                     help='Path to the pretrained model file.')
 parser.add_argument('--node_number_ratio', type=float, default=0.1,
@@ -30,7 +30,7 @@ parser.add_argument('--S_graph_type', type=int, default=0,
 args, unknown = parser.parse_known_args()
 
 
-def generate_random_connected_graph(num_nodes, background_density, background_weight, return_flexible_edges = False):
+def generate_random_connected_graph(num_nodes, G_num_neighbors, background_weight, return_flexible_edges = False):
     eprint("Start tree generation")
     start_time = time.time()
     tree_base = nx.random_tree(n = num_nodes) # , seed=np.random.RandomState()
@@ -38,7 +38,7 @@ def generate_random_connected_graph(num_nodes, background_density, background_we
     eprint(f"Tree generation lasted {exec_time} seconds")
     G = tree_base
     
-    num_edges_to_add = int(num_nodes*(num_nodes - 1)*0.5*background_density - (num_nodes - 1))
+    num_edges_to_add = G_num_neighbors * num_nodes
     #pick num_edges_to_add random edges to add to G
     flexible_edge_list = random.sample(list(nx.non_edges(G)), num_edges_to_add)
     #G = nx.Graph(set(G.edges).union(set(flexible_edge_list)))
@@ -161,9 +161,9 @@ def path_compare(path1, path2):
     return True
 
 
-def construct_test_case(G_num_nodes, G_density, G_background_weight, S_num_nodes, S_weight, S_graph_type):
-    G1 = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight)
-    G2, flexible_edges = generate_random_connected_graph(G_num_nodes, G_density, G_background_weight, return_flexible_edges = True)
+def construct_test_case(G_num_nodes, G_num_neighbors, G_background_weight, S_num_nodes, S_weight, S_graph_type):
+    G1 = generate_random_connected_graph(G_num_nodes, G_num_neighbors, G_background_weight)
+    G2, flexible_edges = generate_random_connected_graph(G_num_nodes, G_num_neighbors, G_background_weight, return_flexible_edges = True)
     
     S_nodes = random.sample(list(G1.nodes), S_num_nodes)
     if graph_type[S_graph_type] == 'path':
@@ -202,8 +202,8 @@ def write_test_case_to_CTD2_input_files(G1, G2, S, out_name_G1=None, out_name_G2
         adj_G2.to_csv(path_or_buf='adj_G2.csv',index=False)
 
 graph_type = {0: 'clique', 1: 'path'}
-(G1, G2, S) = construct_test_case(G_num_nodes=args.G_num_nodes, G_density=args.G_density, G_background_weight=0.1, S_num_nodes=int(np.floor(args.node_number_ratio*args.G_num_nodes)), S_weight=0.1*args.weight_ratio, S_graph_type=args.S_graph_type)
-params = '_'.join(map(str, [args.G_num_nodes, args.G_density, args.weight_ratio, args.node_number_ratio, graph_type[args.S_graph_type]]))
+(G1, G2, S) = construct_test_case(G_num_nodes=args.G_num_nodes, G_num_neighbors=args.G_num_neighbors, G_background_weight=0.1, S_num_nodes=int(np.floor(args.node_number_ratio*args.G_num_nodes)), S_weight=0.1*args.weight_ratio, S_graph_type=args.S_graph_type)
+params = '_'.join(map(str, [args.G_num_nodes, args.G_num_neighbors, args.weight_ratio, args.node_number_ratio, graph_type[args.S_graph_type]]))
 out_name_G1 = 'G1_' + params + '.csv'
 out_name_G2 = 'G2_' + params + '.csv'
 S_fname = 'S_' + params + '.csv'
