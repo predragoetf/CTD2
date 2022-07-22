@@ -2,6 +2,7 @@ import networkx as nx
 from synthetic_graph_generation import rewire
 from synthetic_graph_generation import write_test_case_to_CTD2_input_files
 import numpy as np
+import pandas as pd
 
 def construct_real_test_case(G1_path, G2_path, S_path, S_weight_mul, S_graph_type):
     G1_df = pd.read_csv(G1_path)
