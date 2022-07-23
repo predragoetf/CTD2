@@ -38,7 +38,7 @@ def generate_random_connected_graph(num_nodes, G_num_neighbors, background_weigh
     eprint(f"Tree generation lasted {exec_time} seconds")
     G = tree_base
     
-    num_edges_to_add = G_num_neighbors * num_nodes
+    num_edges_to_add = int(G_num_neighbors * num_nodes)
     #pick num_edges_to_add random edges to add to G
     flexible_edge_list = random.sample(list(nx.non_edges(G)), num_edges_to_add)
     #G = nx.Graph(set(G.edges).union(set(flexible_edge_list)))
