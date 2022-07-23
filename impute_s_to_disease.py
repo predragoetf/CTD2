@@ -30,11 +30,14 @@ def construct_real_test_case(G1_path, G2_path, S_path, S_weight_mul, S_graph_typ
     return (G1, G2, list(S_graph.nodes) )
 
 
-G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 2, 'clique')
+G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 1, 'path')
+write_test_case_to_CTD2_input_files(G1, G1, S, 'diseases/arg_mod_1.csv', 'diseases/rcdp_mod_1.csv', 'diseases/s_arg_mod_1.csv')
+
+G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 2, 'path')
 write_test_case_to_CTD2_input_files(G1, G1, S, 'diseases/arg_mod_2.csv', 'diseases/rcdp_mod_2.csv', 'diseases/s_arg_mod_2.csv')
 
-G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 3, 'clique')
+G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 3, 'path')
 write_test_case_to_CTD2_input_files(G1, G1, S, 'diseases/arg_mod_3.csv', 'diseases/rcdp_mod_3.csv', 'diseases/s_arg_mod_3.csv')
 
-G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 5, 'clique')
+G1, G2, S = construct_real_test_case('diseases/arg.csv', 'diseases/rcdp.csv', 'diseases/s_arg.csv', 5, 'path')
 write_test_case_to_CTD2_input_files(G1, G1, S, 'diseases/arg_mod_5.csv', 'diseases/rcdp_mod_5.csv', 'diseases/s_arg_mod_5.csv')
